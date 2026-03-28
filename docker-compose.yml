@@ -1,0 +1,18 @@
+services:
+  opendartreader:
+    build: .
+    ports:
+      - "8020:8000"
+    environment:
+      - DART_API_KEY=${DART_API_KEY}
+    volumes:
+      - dart_cache:/workspace/OpenDartReader/docs_cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  dart_cache:
