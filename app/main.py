@@ -1,25 +1,29 @@
 # -*- coding: utf-8 -*-
-# OpenDartReader — FastAPI REST + FastMCP 통합 서버
+# opendart-mcp — FastAPI REST + FastMCP 통합 서버
 import os
 import sys
 import json
 from typing import Optional
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 import pandas as pd
 from mcp.server.fastmcp import FastMCP
 
-# __init__.py: sys.modules['OpenDartReader'] = the class itself
-import OpenDartReader as _OpenDartReader
+from opendart_mcp import OpenDartReader as _OpenDartReader
 
 DART_API_KEY = os.environ.get('DART_API_KEY', '')
 
+_dart_instance: Optional[_OpenDartReader] = None
+
 
 def _get_dart() -> _OpenDartReader:
+    global _dart_instance
     if not DART_API_KEY:
         raise RuntimeError("DART_API_KEY 환경변수가 설정되지 않았습니다")
-    return _OpenDartReader(DART_API_KEY)
+    if _dart_instance is None:
+        _dart_instance = _OpenDartReader(DART_API_KEY)
+    return _dart_instance
 
 
 def _df_to_records(df: pd.DataFrame) -> list:
@@ -34,7 +38,7 @@ def _df_to_json_str(df: pd.DataFrame) -> str:
 
 # ── FastMCP 서버 ──────────────────────────────────────────────────────────────
 
-mcp_server = FastMCP("opendartreader", stateless_http=True)
+mcp_server = FastMCP("opendart-mcp", stateless_http=True)
 
 
 @mcp_server.tool()
@@ -160,7 +164,7 @@ async def lifespan(app: FastAPI):
         yield
 
 app = FastAPI(
-    title="OpenDartReader API",
+    title="opendart-mcp API",
     description="금융감독원 전자공시(DART) REST API + MCP 서비스",
     version="0.2.2",
     lifespan=lifespan,
@@ -168,9 +172,12 @@ app = FastAPI(
 
 
 def _get_dart_http() -> _OpenDartReader:
+    global _dart_instance
     if not DART_API_KEY:
         raise HTTPException(status_code=500, detail="DART_API_KEY 환경변수가 설정되지 않았습니다")
-    return _OpenDartReader(DART_API_KEY)
+    if _dart_instance is None:
+        _dart_instance = _OpenDartReader(DART_API_KEY)
+    return _dart_instance
 
 
 @app.get("/health", summary="헬스체크")
@@ -180,17 +187,17 @@ def health():
 
 @app.get("/list", summary="공시 목록 조회")
 def list_disclosures_http(
-    corp: Optional[str] = None,
-    start: Optional[str] = None,
-    end: Optional[str] = None,
-    kind: str = '',
+    corp: Optional[str] = Query(None, max_length=200),
+    start: Optional[str] = Query(None, max_length=20),
+    end: Optional[str] = Query(None, max_length=20),
+    kind: str = Query('', max_length=5),
     final: bool = True,
 ):
     dart = _get_dart_http()
     try:
         df = dart.list(corp=corp, start=start, end=end, kind=kind, final=final)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail="요청한 기업을 찾을 수 없습니다")
     return _df_to_records(df)
 
 
@@ -219,7 +226,7 @@ def report_http(corp: str, key_word: str, year: int, reprt_code: str = '11011'):
     try:
         df = dart.report(corp, key_word, year, reprt_code)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="잘못된 요청 파라미터입니다")
     return _df_to_records(df)
 
 
@@ -235,7 +242,7 @@ def finstate_all_http(corp: str, year: int, reprt_code: str = '11011', fs_div: s
     try:
         df = dart.finstate_all(corp, year, reprt_code, fs_div)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="잘못된 요청 파라미터입니다")
     return _df_to_records(df)
 
 
@@ -245,7 +252,7 @@ def major_shareholders_http(corp: str):
     try:
         df = dart.major_shareholders(corp)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail="요청한 기업을 찾을 수 없습니다")
     return _df_to_records(df)
 
 
@@ -255,7 +262,7 @@ def major_shareholders_exec_http(corp: str):
     try:
         df = dart.major_shareholders_exec(corp)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail="요청한 기업을 찾을 수 없습니다")
     return _df_to_records(df)
 
 
@@ -265,7 +272,7 @@ def event_http(corp: str, key_word: str, start: Optional[str] = None, end: Optio
     try:
         df = dart.event(corp, key_word, start, end)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail="요청한 기업을 찾을 수 없습니다")
     return _df_to_records(df)
 
 
@@ -275,7 +282,7 @@ def regstate_http(corp: str, key_word: str, start: Optional[str] = None, end: Op
     try:
         df = dart.regstate(corp, key_word, start, end)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail="요청한 기업을 찾을 수 없습니다")
     return _df_to_records(df)
 
 

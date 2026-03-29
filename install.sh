@@ -6,12 +6,12 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
-PLIST_ID="com.opendartreader-mcp"
+PLIST_ID="com.opendart-mcp"
 PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_ID}.plist"
 MCP_URL="http://localhost:8020/mcp"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo " OpenDartReader MCP Installer"
+echo " opendart-mcp Installer"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # ── 0. 필수 확인 ────────────────────────────────────────────
@@ -78,9 +78,9 @@ cat > "$PLIST_PATH" <<EOF
   <key>KeepAlive</key>
   <false/>
   <key>StandardOutPath</key>
-  <string>/tmp/opendartreader-mcp.log</string>
+  <string>/tmp/opendart-mcp.log</string>
   <key>StandardErrorPath</key>
-  <string>/tmp/opendartreader-mcp.err</string>
+  <string>/tmp/opendart-mcp.err</string>
 </dict>
 </plist>
 EOF
@@ -123,7 +123,7 @@ except FileNotFoundError:
     data = {}
 
 servers = data.setdefault("mcpServers", {})
-servers["opendartreader"] = {
+servers["opendart-mcp"] = {
     "command": "npx",
     "args": ["-y", "mcp-remote", "$MCP_URL"]
 }
@@ -133,7 +133,7 @@ with open(path, "w") as f:
     f.write("\n")
 
 print(f"   → {path}")
-print(f"   → mcpServers.opendartreader 등록 완료")
+print(f"   → mcpServers.opendart-mcp 등록 완료")
 PYEOF
 
 # ── 완료 ────────────────────────────────────────────────────
@@ -143,9 +143,9 @@ echo "✅ 설치 완료!"
 echo ""
 echo "   MCP 서버:   $MCP_URL"
 echo "   REST API:   http://localhost:8020/docs"
-echo "   로그:       /tmp/opendartreader-mcp.log"
+echo "   로그:       /tmp/opendart-mcp.log"
 echo ""
-echo "   Claude Desktop을 재시작하면 opendartreader MCP가 활성화됩니다."
+echo "   Claude Desktop을 재시작하면 opendart-mcp MCP가 활성화됩니다."
 echo ""
 echo "   ── 관리 명령어 ─────────────────────────"
 echo "   시작:  docker compose -f $SCRIPT_DIR/docker-compose.yml up -d"
