@@ -2,6 +2,18 @@
 
 `OpenDartReader`는 금융감독원 전자공시 시스템의 "Open DART"서비스 API를 손쉽게 사용할 수 있도록 돕는 오픈소스 라이브러리 입니다.
 
+---
+
+> **이 저장소는 [FinanceData/OpenDartReader](https://github.com/FinanceData/OpenDartReader)를 fork한 저장소입니다.**
+>
+> 원본 라이브러리를 기반으로 다음 내용을 추가·변경하였습니다:
+>
+> 1. **Docker 지원** — `Dockerfile` 및 `docker-compose.yml`을 추가하여 컨테이너 환경에서 MCP 서버(`opendart-mcp`)로 실행할 수 있도록 변경하였습니다. `install.sh`를 통해 Claude Desktop에 자동 등록됩니다.
+> 2. **테스트 케이스 추가** — `tests/` 디렉토리에 단위 테스트 및 API 통합 테스트를 추가하였습니다.
+> 3. **보안 문제 해결** — 코드 내 보안 취약점을 점검하고 수정하였습니다.
+
+---
+
 
 ##  OpenDartReader
 `Open DART`는 금융감독원이 제공하는 전자공시 시스템에서 제공하는 API서비스 입니다. 기존의 "오픈API", "공시정보 활용마당" 서비스 확대개편하였으며 2020-01-21 (시범) 서비스 시작하였습니다.
