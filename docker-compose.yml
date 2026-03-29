@@ -1,3 +1,5 @@
+name: opendart-mcp
+
 services:
   opendart-mcp:
     build: .

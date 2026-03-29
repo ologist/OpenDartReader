@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# opendartreader — Claude Desktop 플러그인 설치 스크립트
+# opendart-mcp — Claude Desktop 플러그인 설치 스크립트
 # 사용법: ./install.sh
 
 set -e
