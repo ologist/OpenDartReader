@@ -1,12 +1,12 @@
 services:
-  opendartreader:
+  opendart-mcp:
     build: .
     ports:
-      - "8020:8000"
+      - "127.0.0.1:8020:8000"
     environment:
       - DART_API_KEY=${DART_API_KEY}
     volumes:
-      - dart_cache:/workspace/OpenDartReader/docs_cache
+      - dart_cache:/workspace/opendart-mcp/docs_cache
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
